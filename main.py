@@ -1,15 +1,12 @@
 from PyQt5 import QtCore, QtGui, uic, QtWidgets
 import sys
 import cv2
-import numpy as np
 import threading
-import time
 import queue
-import sqlite3
 
 running = False
 capture_thread = None
-form_class = uic.loadUiType("simple.ui")[0]
+form_class = uic.loadUiType("ui/simple.ui")[0]
 
 def grab(cam, queue, width, height, fps):
     global running
