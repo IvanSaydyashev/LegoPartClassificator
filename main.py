@@ -5,6 +5,7 @@ import numpy as np
 import threading
 import time
 import queue
+import sqlite3
 
 running = False
 capture_thread = None
@@ -27,7 +28,6 @@ def grab(cam, queue, width, height, fps):
         if queue.qsize() < 10:
             queue.put(frame)
         else:
-            print()
             queue.qsize()
 
         if not running:
@@ -80,7 +80,6 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
             gray_filter_flag = True
         else:
             gray_filter_flag = False
-        print(gray_filter_flag)
 
     def video_state(self):
         global running, q
@@ -132,6 +131,6 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
 
 app = QtWidgets.QApplication(sys.argv)
 w = MyWindowClass(None)
-w.setWindowTitle('Kurokesu PyQT OpenCV USB camera test panel')
+w.setWindowTitle('AI Lego')
 w.show()
 app.exec_()
