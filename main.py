@@ -11,7 +11,6 @@ running = False
 capture_thread = None
 form_class = uic.loadUiType("simple.ui")[0]
 
-
 def grab(cam, queue, width, height, fps):
     global running
     capture = cv2.VideoCapture(cam)

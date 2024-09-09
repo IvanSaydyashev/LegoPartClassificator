@@ -11,10 +11,8 @@ sql.execute("""CREATE TABLE IF NOT EXISTS ev3 (
 )""")
 
 db.commit()
-a = '3x3'
-b = '1'
-c = 'a'
-d = '0'
+a, b, c, d = map(str, input().split())
+print(a,b,c,d)
 i1, i2, i3, i4 = [], [], [], []
 for i in sql.execute('SELECT name FROM ev3'):
     i1.append(i[0])
@@ -28,5 +26,9 @@ if a not in i1 and b not in i2 and c not in i3 and d not in i4:
     sql.execute(f'INSERT INTO ev3 VALUES (?, ?, ?, ?)', (a, b, c, d))
     print('Success')
 else:
+    print(a, i1)
+    print(b, i2)
+    print(c, i3)
+    print(d, i4)
     print('Something gone wrong')
 db.commit()
