@@ -3,7 +3,7 @@ import sys
 import cv2
 import threading
 import queue
-
+import db.dbmanager
 running = False
 capture_thread = None
 form_class = uic.loadUiType("ui/simple.ui")[0]
