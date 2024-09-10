@@ -1,7 +1,5 @@
 import sqlite3
 
-from absl.logging import exception
-
 db = sqlite3.connect('details.db')
 
 sql = db.cursor()
@@ -42,10 +40,5 @@ def delete_row(table_name, part_name):
     except Exception as error:
         print(f'Error - {error}')
     db.commit()
-
-
-create_table('test')
-# add_row('test', 'first', '1', 'A', '0')
-delete_row('test', 'first')
 
 db.close()
