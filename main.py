@@ -8,7 +8,7 @@ running = False
 capture_thread = None
 form_class = uic.loadUiType("ui/simple.ui")[0]
 
-def grab(cam, queue, width, height, fps):
+def grab(cam, frame_queue, width, height, fps):
     global running
     capture = cv2.VideoCapture(cam)
     capture.set(cv2.CAP_PROP_FRAME_WIDTH, width)
@@ -21,10 +21,10 @@ def grab(cam, queue, width, height, fps):
         retval, img = capture.retrieve(0)
         frame["img"] = img
 
-        if queue.qsize() < 10:
-            queue.put(frame)
+        if frame_queue.qsize() < 10:
+            frame_queue.put(frame)
         else:
-            queue.qsize()
+            frame_queue.qsize()
 
         if not running:
             break
