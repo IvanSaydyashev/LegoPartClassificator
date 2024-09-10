@@ -29,7 +29,6 @@ def grab(cam, frame_queue, width, height, fps):
         if not running:
             break
 
-
 class OwnImageWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super(OwnImageWidget, self).__init__(parent)
