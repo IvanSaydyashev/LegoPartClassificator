@@ -4,6 +4,11 @@ import cv2
 import threading
 import queue
 import db.dbmanager
+import torch
+from ultralytics import YOLO
+
+model_ev3 = YOLO('weights/ev3.pt')
+
 running = False
 capture_thread = None
 form_class = uic.loadUiType("ui/simple.ui")[0]
@@ -20,7 +25,7 @@ def grab(cam, frame_queue, width, height, fps):
         capture.grab()
         retval, img = capture.retrieve(0)
         frame["img"] = img
-
+        print(model_ev3(img))
         if frame_queue.qsize() < 10:
             frame_queue.put(frame)
         else:
