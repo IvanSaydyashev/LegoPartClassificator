@@ -74,6 +74,8 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
         self.timer.timeout.connect(self.update_frame)
         self.timer.start(1)
 
+
+
     def gray_filter(self, checked):
         global gray_filter_flag
         if checked == 2:
@@ -95,6 +97,14 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
             self.startButton.setText("Stopping...")
 
     def update_frame(self):
+        def getColours(cls_num):
+            base_colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]
+            color_index = cls_num % len(base_colors)
+            increments = [(1, -2, 1), (-2, 1, -1), (1, -1, 2)]
+            color = [base_colors[color_index][i] + increments[color_index][i] *
+                     (cls_num // len(base_colors)) % 256 for i in range(3)]
+            return tuple(color)
+
         global gray_filter_flag
         if not q.empty():
             self.startButton.setEnabled(True)
@@ -120,7 +130,34 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
             height, width, bpc = img.shape
             bpl = bpc * width
             image = QtGui.QImage(img.data, width, height, bpl, QtGui.QImage.Format_RGB888)
-            print(model_ev3(img))
+            results = model_ev3.track(img, stream=True)
+            for result in results:
+                classes_names = result.names
+
+                # iterate over each box
+                for box in result.boxes:
+                    # check if confidence is greater than 40 percent
+                    if box.conf[0] > 0.4:
+                        # get coordinates
+                        [x1, y1, x2, y2] = box.xyxy[0]
+                        # convert to int
+                        x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
+
+                        # get the class
+                        cls = int(box.cls[0])
+
+                        # get the class name
+                        class_name = classes_names[cls]
+
+                        # get the respective colour
+                        colour = getColours(cls)
+
+                        # draw the rectangle
+                        cv2.rectangle(frame, (x1, y1), (x2, y2), colour, 2)
+
+                        # put the class name and confidence on the image
+                        cv2.putText(frame, f'{classes_names[int(box.cls[0])]} {box.conf[0]:.2f}', (x1, y1),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 1, colour, 2)
             if gray_filter_flag:
                 image = image.convertToFormat(QtGui.QImage.Format_Grayscale8)
             self.RawImgWidget.setImage(image)
