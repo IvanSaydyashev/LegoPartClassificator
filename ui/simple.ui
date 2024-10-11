@@ -75,17 +75,30 @@
      <string>Black and White</string>
     </property>
    </widget>
-   <widget class="QCheckBox" name="checkBox_2">
+   <widget class="QCheckBox" name="Switcher">
     <property name="geometry">
      <rect>
       <x>660</x>
-      <y>160</y>
+      <y>200</y>
       <width>131</width>
       <height>31</height>
      </rect>
     </property>
     <property name="text">
-     <string>CheckBox</string>
+     <string>On/Off Model</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="ClassName">
+    <property name="geometry">
+     <rect>
+      <x>660</x>
+      <y>150</y>
+      <width>131</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Classes</string>
     </property>
    </widget>
   </widget>

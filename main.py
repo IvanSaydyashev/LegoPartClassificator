@@ -3,7 +3,6 @@ import sys
 import cv2
 import threading
 import queue
-import db.dbmanager
 from ultralytics import YOLO
 
 model_ev3 = YOLO('weights/ev3.pt')
@@ -54,9 +53,9 @@ class OwnImageWidget(QtWidgets.QWidget):
 
 
 class MyWindowClass(QtWidgets.QMainWindow, form_class):
-    global running, q, gray_filter_flag
+    global running, q, gray_filter_flag, show_class, run_model
     running = False
-    gray_filter_flag = False
+    gray_filter_flag, show_class, run_model = False, False, False
     q = queue.Queue()
 
     def __init__(self, parent=None):
@@ -65,6 +64,8 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
 
         self.startButton.clicked.connect(self.video_state)
         self.BlaWhCheck.stateChanged.connect(self.gray_filter)
+        self.ClassName.stateChanged.connect(self.show_classes)
+        self.Switcher.stateChanged.connect(self.is_run_model)
 
         self.window_width = self.RawImageWidget.frameSize().width()
         self.window_height = self.RawImageWidget.frameSize().height()
@@ -74,7 +75,19 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
         self.timer.timeout.connect(self.update_frame)
         self.timer.start(1)
 
+    def is_run_model(self, checked):
+        global run_model
+        if checked == 2:
+            run_model = True
+        else:
+            run_model = False
 
+    def show_classes(self, checked):
+        global show_class
+        if checked == 2:
+            show_class = True
+        else:
+            show_class = False
 
     def gray_filter(self, checked):
         global gray_filter_flag
@@ -85,7 +98,7 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
 
     def video_state(self):
         global running, q
-        capture_thread = threading.Thread(target=grab, args=(0, q, 1920, 1080, 30))
+        capture_thread = threading.Thread(target=grab, args=(1, q, 640, 480, 30))
         if not running:
             running = True
             capture_thread.start()
@@ -105,7 +118,7 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
                      (cls_num // len(base_colors)) % 256 for i in range(3)]
             return tuple(color)
 
-        global gray_filter_flag
+        global gray_filter_flag, show_class, run_model
         if not q.empty():
             self.startButton.setEnabled(True)
 
@@ -130,36 +143,37 @@ class MyWindowClass(QtWidgets.QMainWindow, form_class):
             height, width, bpc = img.shape
             bpl = bpc * width
             image = QtGui.QImage(img.data, width, height, bpl, QtGui.QImage.Format_RGB888)
-            results = model_ev3.track(img, stream=True)
-            for result in results:
-                classes_names = result.names
-
-                # iterate over each box
-                for box in result.boxes:
-                    # check if confidence is greater than 40 percent
-                    if box.conf[0] > 0.4:
-                        # get coordinates
-                        [x1, y1, x2, y2] = box.xyxy[0]
-                        # convert to int
-                        x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
-
-                        # get the class
-                        cls = int(box.cls[0])
-
-                        # get the class name
-                        class_name = classes_names[cls]
-
-                        # get the respective colour
-                        colour = getColours(cls)
-
-                        # draw the rectangle
-                        cv2.rectangle(frame, (x1, y1), (x2, y2), colour, 2)
-
-                        # put the class name and confidence on the image
-                        cv2.putText(frame, f'{classes_names[int(box.cls[0])]} {box.conf[0]:.2f}', (x1, y1),
-                                    cv2.FONT_HERSHEY_SIMPLEX, 1, colour, 2)
             if gray_filter_flag:
                 image = image.convertToFormat(QtGui.QImage.Format_Grayscale8)
+            if run_model:
+                results = model_ev3.track(img, stream=True)
+                for result in results:
+                    classes_names = result.names
+
+                    # iterate over each box
+                    for box in result.boxes:
+                        # check if confidence is greater than 40 percent
+                        if box.conf[0] > 0.4:
+                            # get coordinates
+                            [x1, y1, x2, y2] = box.xyxy[0]
+                            # convert to int
+                            x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
+
+                            # get the class
+                            cls = int(box.cls[0])
+
+                            # get the class name
+                            class_name = classes_names[cls]
+                            if show_class:
+                                # get the respective colour
+                                colour = getColours(cls)
+
+                                # draw the rectangle
+                                cv2.rectangle(img, (x1, y1), (x2, y2), colour, 2)
+
+                                # put the class name and confidence on the image
+                                cv2.putText(img, f'{classes_names[int(box.cls[0])]} {box.conf[0]:.2f}', (x1, y1),
+                                            cv2.FONT_HERSHEY_SIMPLEX, 1, colour, 2)
             self.RawImgWidget.setImage(image)
 
     def closeEvent(self, event):

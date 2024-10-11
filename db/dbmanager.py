@@ -41,4 +41,6 @@ def delete_row(table_name, part_name):
         print(f'Error - {error}')
     db.commit()
 
+
+add_row('ev3_class', '1', '2', '3', '4')
 db.close()
